@@ -4,18 +4,23 @@ use tracing::{info, error};
 use crate::config::{env::EnvGetter, logging};
 use std::net::SocketAddr;
 use std::time::Instant;
+use std::sync::OnceLock;
 
 mod config;
 mod routes;
+mod db;
 
-static START_TIME: std::sync::OnceLock<Instant> = std::sync::OnceLock::new();
+static START_TIME: OnceLock<Instant> = OnceLock::new();
 
 #[tokio::main]
 async fn main() {
   dotenvy::dotenv().ok();
   logging::init();
 
-  let app= routes::init();
+  let db = db::get_connection().await;
+  let app= routes::init(db);
+
+
   let port = EnvGetter::new("PORT")
     .default("8080")
     .get_as::<u16>()

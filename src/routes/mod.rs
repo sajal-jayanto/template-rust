@@ -3,19 +3,27 @@ use axum::{Router, http::StatusCode, response::IntoResponse, routing::get , Json
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use std::time::Instant;
+use sqlx::PgPool;
 
 mod v1;
 
 use crate::START_TIME;
 
-pub fn init() -> Router {
-  let router = Router::new()
+#[derive(Clone)]
+pub struct AppState { db: PgPool }
+
+pub fn init(db: PgPool) -> Router {
+  let app_state = AppState { db : db };
+  let router = Router::<AppState>::new()
     .nest(
       "/api",
       Router::new()
       .route("/health", get(get_health))
-      .nest("/v1", v1::routes()),
+      .nest("/v1", v1::routes()
+        .with_state::<AppState>(())
+      ),
     )
+    .with_state(app_state)
     .fallback(handler_404);
 
   return router;
