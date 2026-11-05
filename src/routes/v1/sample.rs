@@ -1,12 +1,16 @@
-use axum::{Router, routing::{delete, get, post, put}};
+use axum::{Router, routing::get};
+use crate::handlers::sample;
 
 pub fn routes() -> Router {
-  let routers = Router::new()
-    .route("/", get(|| async { "Hello, World!" }))
-    .route("/", post(|| async { "Hello, World!" }))
-    .route("/{id}", get(|| async { "Hello, World!" }))
-    .route("/{id}", put(|| async { "Hello, World!" }))
-    .route("/{id}", delete(|| async { "Hello, World!" }));
-  
-  return routers;
+  Router::new()
+    .route(
+      "/",
+      get( sample::get_all).post(|| async { "Hello, World!" }),
+    )
+    .route(
+      "/{id}",
+      get(|| async { "Hello, World!" })
+        .put(|| async { "Hello, World!" })
+        .delete(|| async { "Hello, World!" }),
+    )
 }

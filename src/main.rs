@@ -1,27 +1,27 @@
 use tokio::net::TcpListener;
-use tracing::{info, error};
+use tracing::{error, info};
 
-use crate::config::{env::EnvGetter, logging};
+use config::{env, logger};
 use std::net::SocketAddr;
-use std::time::Instant;
 use std::sync::OnceLock;
+use std::time::Instant;
 
 mod config;
-mod routes;
 mod db;
+mod routes;
+mod handlers;
 
 static START_TIME: OnceLock<Instant> = OnceLock::new();
 
 #[tokio::main]
 async fn main() {
   dotenvy::dotenv().ok();
-  logging::init();
+  logger::init();
 
   let db = db::get_connection().await;
-  let app= routes::init(db);
+  let app = routes::init(db);
 
-
-  let port = EnvGetter::new("PORT")
+  let port = env::Var::new("PORT")
     .default("8080")
     .get_as::<u16>()
     .unwrap_or(8080);
@@ -34,7 +34,7 @@ async fn main() {
       std::process::exit(1);
     }
   };
-  info!("🚀 Server successfully started on http://{addr}"); 
+  info!("🚀 Server successfully started on http://{addr}");
   if let Err(e) = axum::serve(listener, app).await {
     error!("Server error: {}", e);
     std::process::exit(1);
