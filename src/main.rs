@@ -10,6 +10,7 @@ mod config;
 mod db;
 mod routes;
 mod handlers;
+mod services;
 
 static START_TIME: OnceLock<Instant> = OnceLock::new();
 

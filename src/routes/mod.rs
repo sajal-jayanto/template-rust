@@ -39,8 +39,8 @@ pub struct HealthStatus {
 
 pub async fn get_health() -> (StatusCode, Json<HealthStatus>) {
   let secs = START_TIME.get_or_init(Instant::now).elapsed().as_secs();
-
   let (hours, minutes, seconds) = (secs / 3600, (secs % 3600) / 60, secs % 60);
+  
   let status = HealthStatus {
     status: "ok",
     time: Utc::now(),
